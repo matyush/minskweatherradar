@@ -1,0 +1,88 @@
+<html>
+<head>
+<title>my radar animation</title>
+</head>
+<script language="javascript">
+
+let params = (new URL(document.location)).searchParams
+
+let framesp = params.get('frames') 
+let frames = framesp ? parseInt(framesp) : 18
+
+let inframedelayp = params.get('inframe')
+let inframedelay = inframedelayp ? parseInt(inframedelayp) : 250
+
+let endframedelayp = params.get('endframe')
+let endframedelay = endframedelayp ? parseInt(endframedelayp) : 1000
+
+function writeParams()
+{
+	document.getElementById('params').innerHTML = 
+		"frames: " + frames + "; " + 
+		"inframe: " + inframedelay + "; " + 
+		"endframe: " + endframedelay
+}
+
+function sleep(ms) {
+	return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+function getImageUrl(offset)
+{
+	const url = "https://pogoda.by/files/radars/static/26850/Radar_26850_MAP_PHEN_";
+	const ext = ".png";
+	let d = new Date();
+	d.setMinutes((Math.floor(d.getMinutes()/10) - offset)*10);
+	let yyyy =  d.getUTCFullYear();
+	let mm = String(d.getUTCMonth()+1).padStart(2, '0');
+	let dd = String(d.getUTCDate()).padStart(2, '0');
+	let hh = String(d.getUTCHours()).padStart(2, '0');
+	let mmin = String(d.getMinutes()).padStart(2, '0');
+	return url + yyyy + mm + dd + "_" + hh + mmin + ext	
+}
+
+function preloadImage(url){
+	const img = new Image();
+	img.src = url;
+	return img;
+}
+
+function preloadImages(count)
+{
+	const images = [];
+	for (var i = 0; i<= count; i++) {
+		images[i] = preloadImage(getImageUrl(i))
+	}
+	return images;
+}
+
+async function animateRadar() {
+
+	// Sleep in loop
+	let images = preloadImages(frames)
+	let  i = frames-1
+	while (1) {
+		document.getElementById('radarimage').src = images[i].src
+		document.getElementById('radarimage').alt = images[i].src
+		if (i<1) { 
+			await sleep(endframedelay)
+			i = frames-1
+		} else {
+			await sleep(inframedelay)
+			i = i - 1
+		}
+	}
+}
+
+function loadPage()
+{
+	writeParams()	
+	animateRadar()	
+}
+
+</script>
+<body onload='loadPage()'>
+<p id="params"></p>
+<img id="radarimage" height="812px" width="1024px"/>
+</body>
+</html>

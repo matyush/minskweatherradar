@@ -15,13 +15,29 @@ let inframedelay = inframedelayp ? parseInt(inframedelayp) : 250
 let endframedelayp = params.get('endframe')
 let endframedelay = endframedelayp ? parseInt(endframedelayp) : 1000
 
+let frameoffsetp = params.get('frameoffset')
+let frameoffset = frameoffsetp ? parseInt(frameoffsetp) : -2
+
 function writeParams()
 {
 	document.getElementById('params').innerHTML = 
 		"frames: " + frames + "; " + 
 		"inframe: " + inframedelay + "; " + 
-		"endframe: " + endframedelay
+		"endframe: " + endframedelay + "; " + 
+		"frameoffset: " + frameoffset
 }
+
+
+function urlExists(url) {
+    var http = new XMLHttpRequest();
+    http.open('HEAD', url, false);
+    http.send();
+    if (http.status == 200)
+				return true;
+    else
+        return false;
+}
+
 
 function sleep(ms) {
 	return new Promise(resolve => setTimeout(resolve, ms));
@@ -32,7 +48,7 @@ function getImageUrl(offset)
 	const url = "https://pogoda.by/files/radars/static/26850/Radar_26850_MAP_PHEN_";
 	const ext = ".png";
 	let d = new Date();
-	d.setMinutes((Math.floor(d.getMinutes()/10) - offset)*10);
+	d.setMinutes(((Math.floor(d.getMinutes()/10) - offset)*10)+frameoffset);
 	let yyyy =  d.getUTCFullYear();
 	let mm = String(d.getUTCMonth()+1).padStart(2, '0');
 	let dd = String(d.getUTCDate()).padStart(2, '0');
@@ -73,6 +89,7 @@ async function animateRadar() {
 		}
 	}
 }
+
 
 function loadPage()
 {
